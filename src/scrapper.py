@@ -10,6 +10,9 @@ soup = bs(req.text, 'lxml')
 
 print(soup.title.string)
 
+papers_dict = {}
+papers = []
+
 items_divs = soup.find_all('div', {'class':'row infinite-item item'})
 
 for item in items_divs:
@@ -19,7 +22,9 @@ for item in items_divs:
             # Check if classes are in child attributes
             if set(child.attrs['class']) <= set(['col-lg-3', 'item-image-col']):
                 # Image url
-                print(child.find('div', {'class':'item-image'})['style'])      
+                print(child.find('div', {'class':'item-image'})['style'])  
+                # TODO : parse url
+                papers_dict['image'] = '';    
         except:
             pass
 
@@ -28,15 +33,18 @@ for item in items_divs:
             if set(child.attrs['class']) <= set(['col-lg-9', 'item-col']):
                 # Title
                 print(child.find('h1').a.string)
+                papers_dict['title'] = child.find('h1').a.string
                 # Nb stars
                 print(child.find('span', {'class':'badge badge-secondary'}).text.strip())
+                papers_dict['nb_stars'] = child.find('span', {'class':'badge badge-secondary'}).text.strip()
                 # Star/hour
                 print(child.find('div', {'class':'stars-accumulated text-center'}).text.strip())
-                # Paper link
+                papers_dict['hourly_stars'] = child.find('div', {'class':'stars-accumulated text-center'}).text.strip();
+                # Paper page link link
                 print(child.find('a', {'class':'badge badge-light'})['href'])
-                # Github link
-                print(child.find('a', {'class':'badge badge-dark'})['href'])
+                link_to_paper_page = child.find('a', {'class':'badge badge-light'})['href']
         except:
             pass
-            
+            link_to_paper_page
+    papers.append(papers_dict)
     print('\n')
