@@ -1,2 +1,2 @@
 # PaperWithCodeScrapper
-Python scrapper for https://paperswithcode.com/
+Python scraper for https://paperswithcode.com/
