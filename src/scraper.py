@@ -3,10 +3,10 @@ import requests
 from bs4 import BeautifulSoup as bs
 from validator_collection import checkers
 
-class Scrapper:
+class Scraper:
     def __init__(self):
         self.rootURL = 'https://paperswithcode.com'
-        self.trendingPapers = self.rootURL
+        self.trendingPapersURL = self.rootURL
         self.latestURL = 'https://paperswithcode.com/latest'
         self.greatestURL = 'https://paperswithcode.com/greatest'
         self.linkToPaperPage = None
@@ -15,7 +15,7 @@ class Scrapper:
         self.greatestPapers = None
 
     def scrapTrending(self):
-        req = requests.get(self.trendingPapers)
+        req = requests.get(self.trendingPapersURL)
         soup = bs(req.text, 'lxml')
 
         self.trendingPapers = self.scrapPage(soup).copy()
@@ -51,9 +51,9 @@ class Scrapper:
                     # Check if classes are in child attributes
                     if set(child.attrs['class']) <= set(['col-lg-3', 'item-image-col']):
                         # Image url
-                        #print(child.find('div', {'class':'item-image'})['style'])  
+                        print(child.find('div', {'class':'item-image'})['style'])  
                         papers_dict['image'] = self.rootURL + str(child.find('div', {'class':'item-image'})['style'].split("('", 1)[1].split("')")[0])
-                        #print(papers_dict['image'])
+                        print(papers_dict['image'])
                 except:
                     pass
 
@@ -61,16 +61,16 @@ class Scrapper:
                 try:
                     if set(child.attrs['class']) <= set(['col-lg-9', 'item-col']):
                         # Title
-                        #print(child.find('h1').a.string)
+                        print(child.find('h1').a.string)
                         papers_dict['title'] = child.find('h1').a.string
                         # Nb stars
-                        #print(child.find('span', {'class':'badge badge-secondary'}).text.strip())
+                        print(child.find('span', {'class':'badge badge-secondary'}).text.strip())
                         papers_dict['nb_stars'] = child.find('span', {'class':'badge badge-secondary'}).text.strip()
                         # Star/hour
-                        #print(child.find('div', {'class':'stars-accumulated text-center'}).text.strip())
-                        papers_dict['hourly_stars'] = child.find('div', {'class':'stars-accumulated text-center'}).text.strip();
+                        print(child.find('div', {'class':'stars-accumulated text-center'}).text.strip())
+                        papers_dict['hourly_stars'] = child.find('div', {'class':'stars-accumulated text-center'}).text.strip()
                         # Paper page link link
-                        #print(child.find('a', {'class':'badge badge-light'})['href'])
+                        print(child.find('a', {'class':'badge badge-light'})['href'])
                         linkToPaperPage = child.find('a', {'class':'badge badge-light'})['href']
                 except:
                     pass
@@ -79,7 +79,7 @@ class Scrapper:
                 req = requests.get(self.rootURL + linkToPaperPage)
                 linkToPaperPage = None
                 soup = bs(req.text, 'lxml')
-                #print(soup.find('a', {'class':'badge badge-light'})['href'])
+                print(soup.find('a', {'class':'badge badge-light'})['href'])
                 pdf_link = soup.find('a', {'class':'badge badge-light'})['href']
                 # Check if the link found is the pdf or a search query
                 if checkers.is_url(pdf_link):
@@ -92,16 +92,16 @@ class Scrapper:
                 if 'application/pdf' in content_type:
                     papers_dict['pdf'] = pdf_link
                     # Github link
-                    #print(soup.find('a', {'class':'code-table-link'})['href'])
+                    print(soup.find('a', {'class':'code-table-link'})['href'])
                     papers_dict['github'] = soup.find('a', {'class':'code-table-link'})['href']
                 elif 'text/html' in content_type:
                     soup = bs(r.text, 'lxml')
                     # PDF link
-                    #print(soup.find('a', {'class':'badge badge-light'})['href'])
+                    print(soup.find('a', {'class':'badge badge-light'})['href'])
                     papers_dict['pdf'] = soup.find('a', {'class':'badge badge-light'})['href']
                     # Github link
-                    #print(soup.find('a', {'class':'code-table-link'})['href'])
+                    print(soup.find('a', {'class':'code-table-link'})['href'])
                     papers_dict['github'] = soup.find('a', {'class':'code-table-link'})['href']
             
-            papers.append(papers_dict)
+            papers.append(papers_dict.copy())
         return papers
