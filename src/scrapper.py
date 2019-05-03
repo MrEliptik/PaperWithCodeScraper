@@ -6,6 +6,7 @@ from validator_collection import checkers
 class Scrapper:
     def __init__(self):
         self.rootURL = 'https://paperswithcode.com'
+        self.trendingPapers = self.rootURL
         self.latestURL = 'https://paperswithcode.com/latest'
         self.greatestURL = 'https://paperswithcode.com/greatest'
         self.linkToPaperPage = None
@@ -14,13 +15,32 @@ class Scrapper:
         self.greatestPapers = None
 
     def scrapTrending(self):
-        self.trendingPapers = []
-        papers_dict = {}
-
-        rootURL = 'https://paperswithcode.com'
-        req = requests.get(rootURL)
-
+        req = requests.get(self.trendingPapers)
         soup = bs(req.text, 'lxml')
+
+        self.trendingPapers = self.scrapPage(soup).copy()
+
+        return self.trendingPapers
+
+    def scrapLatest(self):
+        req = requests.get(self.latestURL)
+        soup = bs(req.text, 'lxml')
+
+        self.latestPapers = self.scrapPage(soup).copy()
+
+        return self.latestPapers
+
+    def scrapGreatest(self):
+        req = requests.get(self.greatestURL)
+        soup = bs(req.text, 'lxml')
+
+        self.greatestPapers = self.scrapPage(soup).copy()
+
+        return self.greatestPapers
+
+    def scrapPage(self, soup):
+        papers_dict = {}
+        papers = []
 
         items_divs = soup.find_all('div', {'class':'row infinite-item item'})
 
@@ -32,7 +52,7 @@ class Scrapper:
                     if set(child.attrs['class']) <= set(['col-lg-3', 'item-image-col']):
                         # Image url
                         #print(child.find('div', {'class':'item-image'})['style'])  
-                        papers_dict['image'] = rootURL + str(child.find('div', {'class':'item-image'})['style'].split("('", 1)[1].split("')")[0])
+                        papers_dict['image'] = self.rootURL + str(child.find('div', {'class':'item-image'})['style'].split("('", 1)[1].split("')")[0])
                         #print(papers_dict['image'])
                 except:
                     pass
@@ -56,7 +76,7 @@ class Scrapper:
                     pass
 
             if linkToPaperPage != None:
-                req = requests.get(rootURL + linkToPaperPage)
+                req = requests.get(self.rootURL + linkToPaperPage)
                 linkToPaperPage = None
                 soup = bs(req.text, 'lxml')
                 #print(soup.find('a', {'class':'badge badge-light'})['href'])
@@ -65,7 +85,7 @@ class Scrapper:
                 if checkers.is_url(pdf_link):
                     r = requests.get(pdf_link)
                 else:
-                    r = requests.get(rootURL + pdf_link)
+                    r = requests.get(self.rootURL + pdf_link)
                 
                 content_type = r.headers.get('content-type')
 
@@ -82,12 +102,6 @@ class Scrapper:
                     # Github link
                     #print(soup.find('a', {'class':'code-table-link'})['href'])
                     papers_dict['github'] = soup.find('a', {'class':'code-table-link'})['href']
-
-            self.trendingPapers.append(papers_dict)
-        return self.trendingPapers
-
-    def scrapLatest(self):
-        raise NotImplementedError
-
-    def scrapGreatest(self):
-        raise NotImplementedError
+            
+            papers.append(papers_dict)
+        return papers
